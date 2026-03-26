@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "express": "^5.2.1",
+    "ytdlp-nodejs": "^3.4.4"
+  },
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "jest test/"
+  }
+}

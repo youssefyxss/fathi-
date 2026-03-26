@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Video Processor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="url"],
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      white-space: pre-wrap;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>YouTube Video Processor</h1>
+    <form id="videoForm">
+      <div class="form-group">
+        <label for="videoUrl">YouTube Video URL:</label>
+        <input type="url" id="videoUrl" name="videoUrl" required placeholder="https://www.youtube.com/watch?v=...">
+      </div>
+      <div class="form-group">
+        <label for="format">Format:</label>
+        <select id="format" name="format">
+          <option value="best">Best</option>
+          <option value="mp4">MP4</option>
+          <option value="webm">WebM</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="quality">Quality:</label>
+        <select id="quality" name="quality">
+          <option value="highest">Highest</option>
+          <option value="lowest">Lowest</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="output">Output Path:</label>
+        <input type="text" id="output" name="output" placeholder="./output/%(title)s.%(ext)s">
+      </div>
+      <button type="submit">Process Video</button>
+    </form>
+    <div id="response"></div>
+  </div>
+
+  <script>
+    document.getElementById('videoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const videoUrl = document.getElementById('videoUrl').value;
+      const format = document.getElementById('format').value;
+      const quality = document.getElementById('quality').value;
+      const output = document.getElementById('output').value;
+
+      const responseDiv = document.getElementById('response');
+      responseDiv.innerHTML = 'Processing...';
+
+      try {
+        const response = await fetch('/api/youtube/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            videoUrl,
+            config: {
+              format,
+              quality,
+              output: output || undefined
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          responseDiv.innerHTML = `<strong>Success:</strong> ${data.message}<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } else {
+          responseDiv.innerHTML = `<strong class="error">Error:</strong> ${data.error}<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+      } catch (error) {
+        responseDiv.innerHTML = `<strong class="error">Error:</strong> ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
